@@ -1,0 +1,29 @@
+{
+  "name": "scenetrack",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Akash911-prog/SceneTrack#readme",
+  "bugs": {
+    "url": "https://github.com/Akash911-prog/SceneTrack/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akash911-prog/SceneTrack.git"
+  },
+  "license": "ISC",
+  "author": "Akash Samanta",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.24",
+    "@types/node": "^25.5.0",
+    "webpack": "^5.105.4",
+    "webpack-cli": "^7.0.2"
+  },
+  "dependencies": {
+    "lodash": "^4.17.23"
+  }
+}
