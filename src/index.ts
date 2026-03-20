@@ -1,16 +1,15 @@
-import { confirm, intro, outro, select } from "@clack/prompts";
+import { intro, outro, select } from "@clack/prompts";
 
 import { OPTIONS, type MainMenuChoice } from './constants';
 import { FUNCTION_MAP } from "./functionMaps";
-import { fuzzySearch } from "./components/fuzzySearch";
 
-// intro("SceneTrack your personal watchlist!");
+intro("SceneTrack your personal watchlist!");
 
 while (true) {
 
-    const choice = await fuzzySearch({
+    const choice = await select({
         message: 'Main Menu',
-        items: [...OPTIONS.mainMenu]
+        options: [...OPTIONS.mainMenu]
     }) as MainMenuChoice
 
     if (choice === 'exit') {

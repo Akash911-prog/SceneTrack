@@ -89,13 +89,15 @@ export const fuzzySearch = createPrompt(<T>(
 
     const searchLine = `${prefix} ${theme.style.message(config.message, 'idle')} ${query}`
 
+    const separator = `\x1b[2m│\x1b[0m` // dim vertical bar, same as clack
+
     const listLines = visible.length === 0
-        ? [`  ${theme.style.error('No results')}`]
+        ? [`${separator}  ${theme.style.error('No results')}`]
         : visible.map((item, i) => {
             if (i === safeCursor) {
-                return `  ${theme.style.highlight('❯ ' + item.label)}`
+                return `  ${theme.style.highlight('  ◈ ' + item.label)}`
             }
-            return `    ${item.label}`
+            return `    ◇ ${item.label}`
         })
 
     return [searchLine, ...listLines].join('\n')

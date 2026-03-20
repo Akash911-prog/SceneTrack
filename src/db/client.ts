@@ -1,11 +1,11 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { Database } from "bun:sqlite";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import path from 'path';
 import * as schema from './schema'
 
 const sqlite = new Database(path.join(process.cwd(), 'scenetrack.db'));
-export const db = drizzle(sqlite, { schema, casing: 'snake_case' });
+export const db = drizzle(sqlite, { schema });
 
-const migrationsFolder = path.resolve(import.meta.dir, 'db/migrations')
+const migrationsFolder = path.resolve(import.meta.dir, '../db/migrations')
 migrate(db, { migrationsFolder })
