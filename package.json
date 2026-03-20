@@ -29,9 +29,12 @@
     "ts-loader": "^9.5.4"
   },
   "dependencies": {
+    "@clack/prompts": "^1.1.0",
+    "@inquirer/core": "^11.1.7",
     "better-sqlite3": "^12.8.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
+    "fuse.js": "^7.1.0",
     "lodash-es": "^4.17.23"
   }
 }
