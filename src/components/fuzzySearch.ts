@@ -23,18 +23,20 @@ type FuzzySearchConfig<T> = {
     message: string
     items: Item<T>[]
     theme?: PartialDeep<Theme>
+    multiple?: boolean
 }
 
 const MAX_VISIBLE = 6
 
 export const fuzzySearch = createPrompt(<T>(
     config: FuzzySearchConfig<T>,
-    done: (value: T) => void
+    done: (value: T | T[]) => void
 ) => {
     const theme = makeTheme(config.theme)
     const prefix = usePrefix({ status: 'idle', theme })
     const [query, setQuery] = useState('')
     const [cursor, setCursor] = useState(0)
+    const [selected, setSelected] = useState<T[]>([])
 
     const fuse = useMemo(
         () => new Fuse(config.items, { keys: ['label'], threshold: 0.4 }),
@@ -50,11 +52,27 @@ export const fuzzySearch = createPrompt(<T>(
     const safeCursor = Math.min(cursor, Math.max(visible.length - 1, 0))
 
     useKeypress((key, rl) => {
+
+        if (key.name === 'space' && config.multiple) {
+            const item = visible[safeCursor];
+            if (!item) return;
+            const already = selected.includes(item.value);
+            setSelected(already
+                ? selected.filter(v => v !== item.value)
+                : [...selected, item.value]
+            )
+        }
+
         if (isEnterKey(key)) {
-            const selected = visible[safeCursor]
-            if (selected) {
+            if (config.multiple) {
                 process.stdout.write('\x1B[?25h')
-                done(selected.value)
+                done(selected as any)
+            } else {
+                const item = visible[safeCursor]
+                if (item) {
+                    process.stdout.write('\x1B[?25h')
+                    done(item.value)
+                }
             }
             return
         }
@@ -94,10 +112,21 @@ export const fuzzySearch = createPrompt(<T>(
     const listLines = visible.length === 0
         ? [`${separator}  ${theme.style.error('No results')}`]
         : visible.map((item, i) => {
-            if (i === safeCursor) {
-                return `  ${theme.style.highlight('  ◈ ' + item.label)}`
+            const isCursor = i === safeCursor
+
+            if (config.multiple) {
+                const isSelected = selected.includes(item.value)
+                const checkbox = isSelected ? '◼' : '◻'
+                if (isCursor) {
+                    return `${separator}  ${theme.style.highlight('❯ ' + checkbox + ' ' + item.label)}`
+                }
+                return `${separator}    ${checkbox} ${item.label}`
             }
-            return `    ◇ ${item.label}`
+
+            if (isCursor) {
+                return `${separator}  ${theme.style.highlight('  ◈ ' + item.label)}`
+            }
+            return `${separator}    ◇ ${item.label}`
         })
 
     return [searchLine, ...listLines].join('\n')

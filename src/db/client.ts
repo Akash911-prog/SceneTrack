@@ -4,7 +4,7 @@ import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import path from 'path';
 import * as schema from './schema'
 
-const sqlite = new Database(path.join(process.cwd(), 'scenetrack.db'));
+const sqlite = new Database(path.join(process.cwd(), 'dbfiles/scenetrack.db'));
 export const db = drizzle(sqlite, { schema });
 
 const migrationsFolder = path.resolve(import.meta.dir, '../db/migrations')

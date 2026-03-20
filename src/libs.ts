@@ -1,6 +1,8 @@
 // src/commands/viewAllShows.ts
 import Table from 'cli-table3'
 import type { shows } from './db/schema'
+import { OPTIONS, type fields } from './constants'
+import { select, text } from '@clack/prompts'
 
 const STATUS_COLOR: Record<string, string> = {
     watching: '\x1b[36m',  // cyan
@@ -47,4 +49,88 @@ export function buildTable(rows: typeof shows.$inferSelect[]) {
     }
 
     return table.toString()
+}
+
+export type ShowRecord = typeof shows.$inferSelect
+
+export async function promptForField(field: fields, current: ShowRecord) {
+    switch (field) {
+        case 'title':
+            return text({
+                message: 'New title:',
+                defaultValue: current.title,
+                validate: v => (!v || v.length === 0) ? 'Title is required' : undefined
+            })
+
+        case 'type':
+            return select({
+                message: 'New type:',
+                options: [...OPTIONS.showTypes]
+            })
+
+        case 'status':
+            return select({
+                message: 'New status:',
+                options: [...OPTIONS.statusOptions]
+            })
+
+        case 'rating':
+            return text({
+                message: 'New rating (1-10):',
+                defaultValue: current.rating?.toString() ?? '',
+                validate: v => {
+                    if (!v) return undefined
+                    const n = Number(v)
+                    if (isNaN(n) || n < 1 || n > 10) return 'Must be between 1 and 10'
+                }
+            })
+
+        case 'genre':
+            return text({
+                message: 'New genre:',
+                defaultValue: current.genre ?? '',
+            })
+
+        case 'notes':
+            return text({
+                message: 'New notes:',
+                defaultValue: current.notes ?? '',
+            })
+
+        case 'totalEpisodes':
+            return text({
+                message: 'Total episodes:',
+                defaultValue: current.totalEpisodes?.toString() ?? '',
+                validate: v => {
+                    if (v && isNaN(Number(v))) return 'Must be a number'
+                }
+            })
+
+        case 'watchedEpisodes':
+            return text({
+                message: 'Watched episodes:',
+                defaultValue: current.watchedEpisodes.toString(),
+                validate: v => {
+                    if (v && isNaN(Number(v))) return 'Must be a number'
+                }
+            })
+
+        case 'startedAt':
+            return text({
+                message: 'Started at (YYYY-MM-DD):',
+                defaultValue: current.startedAt?.toISOString().slice(0, 10) ?? '',
+                validate: v => {
+                    if (v && isNaN(Date.parse(v))) return 'Invalid date'
+                }
+            })
+
+        case 'finishedAt':
+            return text({
+                message: 'Finished at (YYYY-MM-DD):',
+                defaultValue: current.finishedAt?.toISOString().slice(0, 10) ?? '',
+                validate: v => {
+                    if (v && isNaN(Date.parse(v))) return 'Invalid date'
+                }
+            })
+    }
 }
