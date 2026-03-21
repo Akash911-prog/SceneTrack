@@ -1,0 +1,16 @@
+<metadata>
+  <id>scenetrack</id>
+  <version>1.1.0</version>
+  <title>SceneTrack - CLI Watchlist Manager</title>
+  <authors>Akash911-prog</authors>
+  <owners>Akash911-prog</owners>
+  <projectUrl>https://github.com/Akash911-prog/scenetrack</projectUrl>
+  <packageSourceUrl>https://github.com/Akash911-prog/scenetrack/chocolatey</packageSourceUrl>
+  <summary>A CLI tool for managing your watchlist with timestamps and fuzzy search</summary>
+  <description>A menu-driven CLI tool for watchlist management...</description>
+  <releaseNotes>https://github.com/Akash911-prog/scenetrack/releases</releaseNotes>
+  <tags>cli watchlist sqlite terminal</tags>
+  <docsUrl>https://github.com/Akash911-prog/scenetrack#readme</docsUrl>
+  <bugTrackerUrl>https://github.com/Akash911-prog/scenetrack/issues</bugTrackerUrl>
+  <projectSourceUrl>https://github.com/Akash911-prog/scenetrack</projectSourceUrl>
+</metadata>
