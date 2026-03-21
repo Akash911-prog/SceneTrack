@@ -24,6 +24,12 @@ brew tap Akash911-prog/scenetrack
 brew install scenetrack
 ```
 
+### Windows (Chocolatey)
+
+```bash
+choco install scenetrack
+```
+
 ### Windows (manual)
 
 Download the latest `.zip` from the [releases page](https://github.com/Akash911-prog/scenetrack/releases), extract it, and add the binary to your PATH.
