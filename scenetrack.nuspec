@@ -8,6 +8,8 @@
     <projectUrl>https://github.com/Akash911-prog/scenetrack</projectUrl>
     <description>A menu-driven CLI tool for watchlist management with timestamps and fuzzy search</description>
     <licenseUrl>https://github.com/Akash911-prog/SceneTrack/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <releaseNotes>https://github.com/Akash911-prog/scenetrack/releases</releaseNotes>
     <tags>cli watchlist sqlite</tags>
   </metadata>
 </package>
