@@ -1,6 +1,6 @@
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 Install-ChocolateyZipPackage 'scenetrack' `
-  'https://github.com/Akash911-prog/scenetrack/releases/download/v1.1.0/scenetrack-windows-x64.zip' `
+  'https://github.com/Akash911-prog/scenetrack/releases/download/v1.2.0/scenetrack-windows-x64.zip' `
   $toolsDir `
-  -checksum '5037cb53f2d3a69d96679fcdf72bdd8edc99b184aafa489772f1658bf5887a53' `
+  -checksum 'a68ee3e26da022091d6ad3cff9f2ce3c58c22009fb9138a17d4f7a94f4d09ade' `
   -checksumType 'sha256'

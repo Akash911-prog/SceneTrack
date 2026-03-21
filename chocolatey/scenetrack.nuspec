@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>scenetrack</id>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <title>SceneTrack - CLI Watchlist Manager</title>
     <authors>Akash911-prog</authors>
     <owners>Akash911-prog</owners>
