@@ -1,8 +1,8 @@
 // src/commands/viewAllShows.ts
 import Table from 'cli-table3'
 import { shows, timestamps } from './db/schema'
-import { OPTIONS, type fields, type showTypes } from './constants'
-import { select, text } from '@clack/prompts'
+import { OPTIONS, type fields, type showTypes, type TimestampField } from './constants'
+import { groupMultiselect, select, text, type Option } from '@clack/prompts'
 import { db } from './db/client'
 import { fuzzySearch } from './components/fuzzySearch'
 
@@ -137,13 +137,23 @@ export async function promptForField(field: fields, current: ShowRecord) {
     }
 }
 
-export async function fuzzyFindShow(): Promise<number> {
+export async function fuzzyFindShow(multiple: boolean = false): Promise<number | number[]> {
     const allShows = await db.select().from(shows);
 
     const items = allShows.map(show => ({
         label: `${show.title} — ${show.type} · ${show.status}`,
         value: show.id
     }))
+
+    if (multiple) {
+        const showIds = await fuzzySearch({
+            message: "Which Shows you want to edit:",
+            items: items,
+            multiple: true
+        }) as number[]
+
+        return showIds;
+    }
 
     const showId = await fuzzySearch({
         message: "Which Show you want to edit:",
@@ -153,10 +163,15 @@ export async function fuzzyFindShow(): Promise<number> {
     return showId;
 }
 
-export function buildTableTimeStamp(rows: typeof timestamps.$inferSelect[], show: typeof shows.$inferSelect, showShow: boolean) {
+export type RowTimeStamp = {
+    show: typeof shows.$inferSelect,
+    timestamps: typeof timestamps.$inferSelect[]
+}
+
+export function buildTableTimeStamp(rows: RowTimeStamp[], showShow: boolean) {
     const table = new Table({
-        head: showShow ? ['Show', 'Episode', 'Timestamp', 'Note'] : [],
-        colWidths: [32, 14, 12, 12, 8],
+        head: showShow ? ['Show', 'Episode', 'Timestamp', 'Note'] : ['Episode', 'Timestamp', 'Note'],
+        colWidths: showShow ? [32, 14, 12, 32] : [14, 12, 32],
         style: { head: ['cyan'], border: ['dim'] },
         chars: {
             top: '─', 'top-mid': '┬', 'top-left': '┌', 'top-right': '┐',
@@ -166,21 +181,61 @@ export function buildTableTimeStamp(rows: typeof timestamps.$inferSelect[], show
         }
     })
 
-    for (const show of rows) {
-        const progress = show.type === 'movie'
-            ? '-'
-            : show.totalEpisodes
-                ? `${show.watchedEpisodes}/${show.totalEpisodes}`
-                : `${show.watchedEpisodes}/-`
-
-        table.push([
-            show.title.slice(0, 29),
-            `${DIM}${show.type}${RESET}`,
-            colorStatus(show.status),
-            `${DIM}${progress}${RESET}`,
-            show.rating ? `${show.rating}/10` : `${DIM}-${RESET}`,
-        ])
+    if (showShow) {
+        for (const row of rows) {
+            for (const timestamp of row.timestamps) {
+                table.push([
+                    row.show.title,
+                    timestamp.episode,
+                    timestamp.time,
+                    timestamp.note
+                ])
+            }
+        }
+    } else {
+        for (const row of rows) {
+            for (const timestamp of row.timestamps) {
+                table.push([
+                    timestamp.episode,
+                    timestamp.time,
+                    timestamp.note
+                ])
+            }
+        }
     }
 
     return table.toString()
+}
+
+export async function promptForTimestampField(field: TimestampField, current: typeof timestamps.$inferSelect) {
+    switch (field) {
+        case 'episode':
+            return text({
+                message: 'Episode number:',
+                placeholder: current.episode?.toString() ?? '',
+                initialValue: current.episode?.toString() ?? '',
+            });
+        case 'time':
+            return text({
+                message: 'Timestamp (e.g. 12:34):',
+                placeholder: current.time ?? '',
+                initialValue: current.time ?? '',
+            });
+        case 'note':
+            return text({
+                message: 'Note:',
+                placeholder: current.note ?? '',
+                initialValue: current.note ?? '',
+            });
+    }
+}
+
+export async function getFilters() {
+
+    const filters = await groupMultiselect({
+        message: "Filters: ",
+        options: OPTIONS.filterOptions
+    })
+
+    return filters;
 }

@@ -1,6 +1,7 @@
 import { addShow } from "./shows/add"
 import { editShow } from "./shows/edit"
 import { removeShow } from "./shows/remove"
+import { search } from "./shows/search"
 import { viewAllShows } from "./shows/viewAll"
 import { addTimestamp } from "./timeStamps/add"
 import { editTimestamp } from "./timeStamps/edit"
@@ -13,7 +14,8 @@ const mainMenu: Record<string, () => Promise<void>> = {
     editShow,
     removeShow,
     viewAllShows,
-    timeStamp: showTimeStampMenu
+    timeStamp: showTimeStampMenu,
+    search
 }
 
 const timeStampMenu: Record<string, () => Promise<void>> = {

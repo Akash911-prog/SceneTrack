@@ -4,6 +4,7 @@ import { timestamps } from "../db/schema";
 import { fuzzyFindShow } from "../libs";
 import { text } from "@clack/prompts";
 import { log } from "@clack/prompts";
+import { ExitPromptError } from "@inquirer/core";
 
 export async function addTimestamp() {
 
@@ -28,7 +29,7 @@ export async function addTimestamp() {
 
                         const [hours, minutes] = value.split(':').map(Number);
                         if (hours === undefined || minutes === undefined) return 'Invalid timestamp';
-                        if (hours > 23) return 'Hours must be between 00 and 23';
+                        if (hours > 59) return 'Hours must be between 00 and 59';
                         if (minutes > 59) return 'Minutes must be between 00 and 59';
                     }
                 }),
@@ -45,8 +46,8 @@ export async function addTimestamp() {
             }
         )
 
-        db.insert(timestamps).values({
-            showId: showId,
+        await db.insert(timestamps).values({
+            showId: showId as number,
             episode: Number(result.episode) as number,
             time: result.time as string,
             note: result.note as string | null
@@ -55,7 +56,11 @@ export async function addTimestamp() {
         log.success("Timestamp Added Successfully")
 
     } catch (error) {
-        cancel("Operation Cancelled")
-        return
+        if (error instanceof ExitPromptError) {
+            log.error("No Value Selected!");
+        }
+        else {
+            log.error(`Error at addTimestamps. ${error}`)
+        }
     }
 }

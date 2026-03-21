@@ -1,12 +1,43 @@
 import { emitKeypressEvents } from "readline"
-import { DIM, PAGE_SIZE, RESET } from "../constants"
+import { DIM, OPTIONS, PAGE_SIZE, RESET } from "../constants"
 import { db } from "../db/client"
 import { shows } from "../db/schema"
-import { buildTable } from "../libs"
+import { buildTable, getFilters } from "../libs"
+import { and, inArray } from "drizzle-orm"
+import { confirm } from "@clack/prompts"
 
 
 export async function viewAllShows() {
-    const allShows = db.select().from(shows).all()
+
+    const addFilter = await confirm({
+        message: "Add filters?",
+        initialValue: false
+    })
+    let allShows: typeof shows.$inferSelect[];
+
+    if (!addFilter) {
+        allShows = db.select().from(shows).all();
+    } else {
+        const filters = await getFilters() as string[];
+        const selectedTypes = OPTIONS.filterOptions.type
+            .filter(o => filters.includes(o.value))
+            .map(o => o.value) as typeof shows.$inferSelect['type'][];
+
+        const selectedStatuses = OPTIONS.filterOptions.status
+            .filter(o => filters.includes(o.value))
+            .map(o => o.value) as typeof shows.$inferSelect['status'][];
+
+        const selectedRatings = OPTIONS.filterOptions.rating
+            .filter(o => filters.includes(o.value))
+            .map(o => Number(o.value));
+
+        allShows = await db.select().from(shows).where(and(
+            selectedStatuses.length ? inArray(shows.status, selectedStatuses) : undefined,
+            selectedTypes.length ? inArray(shows.type, selectedTypes) : undefined,
+            selectedRatings.length ? inArray(shows.rating, selectedRatings) : undefined,
+        ))
+    }
+
 
     if (allShows.length === 0) {
         console.log(`${DIM}No shows in your watchlist yet.${RESET}`)

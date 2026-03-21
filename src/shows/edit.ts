@@ -12,7 +12,7 @@ export async function editShow() {
     try {
 
         // 1. find show
-        const showId = await fuzzyFindShow()
+        const showId = await fuzzyFindShow() as number;
 
         // 2. get current data
         const current = db.select().from(shows).where(eq(shows.id, showId)).get()

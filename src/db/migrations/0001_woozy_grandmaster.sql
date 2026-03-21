@@ -1,0 +1,1 @@
+ALTER TABLE `timestamps` ADD `time` text;

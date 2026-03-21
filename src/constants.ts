@@ -4,7 +4,8 @@ const mainMenu = [
     { value: 'removeShow', label: '3. Remove Show' },
     { value: 'viewAllShows', label: '4. View All Shows' },
     { value: 'timeStamp', label: '5. timeStamps' },
-    { value: 'exit', label: '6. Exit' },
+    { value: 'search', label: '6. Search Show in Watchlist' },
+    { value: 'exit', label: '7. Exit' },
 ] as const
 
 const showTypes = [
@@ -44,12 +45,48 @@ const fields = [
     { label: 'Finished At', value: 'finishedAt' },
 ] as const
 
+const timeStampFields = [
+    { value: 'episode', label: 'Episode' },
+    { value: 'time', label: 'Time' },
+    { value: 'note', label: 'Note' },
+] as const;
+
+const filterOptions = {
+    type: [
+        { value: 'series', label: 'Series' },
+        { value: 'movie', label: 'Movie' },
+        { value: 'anime', label: 'Anime' },
+        { value: 'documentary', label: 'Documentary' },
+    ],
+    status: [
+        { value: 'planning', label: 'Planning' },
+        { value: 'watching', label: 'Watching' },
+        { value: 'watched', label: 'Watched' },
+        { value: 'dropped', label: 'Dropped' },
+        { value: 'paused', label: 'Paused' },
+    ],
+    rating: [
+        { value: '1', label: '1 ' },
+        { value: '2', label: '2 ' },
+        { value: '3', label: '3 ' },
+        { value: '4', label: '4 ' },
+        { value: '5', label: '5 ' },
+        { value: '6', label: '6 ' },
+        { value: '7', label: '7 ' },
+        { value: '8', label: '8 ' },
+        { value: '9', label: '9 ' },
+        { value: '10', label: '10 ' },
+    ],
+}
+
 export const OPTIONS = {
     mainMenu,
     showTypes,
     statusOptions,
     fields,
-    timeStampMenu
+    timeStampMenu,
+    timeStampFields,
+    filterOptions
 }
 
 export const PAGE_SIZE = 8
@@ -62,3 +99,13 @@ export type statusOptions = typeof statusOptions[number]['value']
 export type fields = typeof fields[number]['value']
 export type fieldsArray = Array<fields>
 export type timeStampMenu = typeof timeStampMenu[number]['value']
+export type TimestampField = typeof timeStampFields[number]['value'];
+type TypeValue = typeof filterOptions['type'][number]['value'];
+type StatusValue = typeof filterOptions['status'][number]['value'];
+type RatingValue = typeof filterOptions['rating'][number]['value'];
+
+export type SelectedFilters = {
+    type?: TypeValue;
+    status?: StatusValue;
+    rating?: RatingValue;
+}
