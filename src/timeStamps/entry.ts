@@ -13,5 +13,6 @@ export async function showTimeStampMenu() {
     }
     else {
         await FUNCTION_MAP.timeStampMenu[choice]?.();
+        return;
     }
 }

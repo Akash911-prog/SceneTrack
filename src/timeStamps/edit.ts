@@ -1,4 +1,4 @@
-import { isCancel, cancel } from "@clack/prompts";
+import { isCancel, cancel, autocomplete, autocompleteMultiselect } from "@clack/prompts";
 import { ExitPromptError } from "@inquirer/core";
 import { log } from "@clack/prompts";
 import { eq } from "drizzle-orm";
@@ -20,22 +20,20 @@ export async function editTimestamp() {
             return;
         }
 
-        const selectedTimestamp = await fuzzySearch({
+        const selectedTimestamp = await autocomplete({
             message: "Select a timestamp to edit",
-            items: timestampRows.map(t => ({
+            options: timestampRows.map(t => ({
                 label: `Ep ${t.episode ?? '?'} | ${t.time ?? '?'} | ${t.note ?? ''} | ${t.loggedAt ? new Date(t.loggedAt).toLocaleDateString() : 'no date'}`,
                 value: t.id
-            })),
-            multiple: false
+            }))
         }) as number;
 
         const current = db.select().from(timestamps).where(eq(timestamps.id, selectedTimestamp)).get();
         if (!current) return;
 
-        const selectedFields = await fuzzySearch({
+        const selectedFields = await autocompleteMultiselect({
             message: "What fields do you want to edit? (space to select)",
-            items: [...OPTIONS.timeStampFields],
-            multiple: true
+            options: [...OPTIONS.timeStampFields]
         }) as TimestampField[];
 
         // 4. prompt for each field
@@ -54,9 +52,11 @@ export async function editTimestamp() {
             }
         }
 
-        console.log(updates);
         await db.update(timestamps).set(updates).where(eq(timestamps.id, selectedTimestamp));
         log.success("Timestamp updated successfully");
+        console.error('[debug] rawMode state:', (process.stdin as any)._readableState)
+        console.error('[debug] keypress listeners:', process.stdin.listenerCount('keypress'))
+        console.error('[debug] isRaw:', process.stdin.isRaw)
 
     } catch (error) {
         if (error instanceof ExitPromptError) {

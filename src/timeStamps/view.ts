@@ -47,7 +47,9 @@ export async function viewTimestamp() {
 
     render()
 
-    emitKeypressEvents(process.stdin)
+    if (!process.stdin.listenerCount('keypress')) {
+        emitKeypressEvents(process.stdin)
+    }
     process.stdin.setRawMode(true)
     process.stdin.resume()
 
@@ -56,9 +58,9 @@ export async function viewTimestamp() {
             if (!key) return
 
             if (key.name === 'q' || key.name === 'escape') {
-                process.stdin.setRawMode(false)
-                process.stdin.pause()
                 process.stdin.removeListener('keypress', handler)
+                // process.stdin.setRawMode(false)
+                process.stdin.pause()
                 console.clear()
                 resolve()
                 return

@@ -3,7 +3,7 @@ import { db } from "../db/client";
 import { timestamps } from "../db/schema";
 import { fuzzyFindShow } from "../libs";
 import { fuzzySearch } from "../components/fuzzySearch";
-import { confirm, log } from "@clack/prompts";
+import { autocomplete, autocompleteMultiselect, confirm, log } from "@clack/prompts";
 import { ExitPromptError } from "@inquirer/core";
 
 export async function removeTimestamp() {
@@ -20,10 +20,9 @@ export async function removeTimestamp() {
             }
         })
 
-        const toDelete = await fuzzySearch({
+        const toDelete = await autocompleteMultiselect({
             message: "Select timestamps to delete (space to select | enter to continue)",
-            items: items,
-            multiple: true
+            options: items
         }) as number[]
 
         const confirmed = await confirm({

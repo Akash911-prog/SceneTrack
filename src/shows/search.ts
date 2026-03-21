@@ -1,8 +1,7 @@
-import { log } from "@clack/prompts";
+import { autocompleteMultiselect, log } from "@clack/prompts";
 import { db } from "../db/client";
 import { shows } from "../db/schema";
 import Table from 'cli-table3';
-import { fuzzySearch } from "../components/fuzzySearch";
 import { ExitPromptError } from "@inquirer/core";
 
 export async function search() {
@@ -13,10 +12,9 @@ export async function search() {
             return;
         }
 
-        const selected = await fuzzySearch({
+        const selected = await autocompleteMultiselect({
             message: "Search for a show",
-            items: allShows.map(s => ({ label: `${s.title} - ${s.type} • ${s.status}`, value: s })),
-            multiple: true,
+            options: allShows.map(s => ({ label: `${s.title} - ${s.type} • ${s.status}`, value: s })),
         }) as typeof shows.$inferSelect[];
 
         if (!selected.length) {

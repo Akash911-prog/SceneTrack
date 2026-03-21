@@ -1,17 +1,6 @@
 // src/components/fuzzySearch.ts
-import {
-    createPrompt,
-    useState,
-    useKeypress,
-    useMemo,
-    usePrefix,
-    makeTheme,
-    isUpKey,
-    isDownKey,
-    isEnterKey,
-    type Theme,
-} from '@inquirer/core'
-import type { PartialDeep } from '@inquirer/type'
+import { Prompt, isCancel } from '@clack/core'
+import type { Key } from 'readline'
 import Fuse from 'fuse.js'
 
 type Item<T> = {
@@ -22,112 +11,150 @@ type Item<T> = {
 type FuzzySearchConfig<T> = {
     message: string
     items: Item<T>[]
-    theme?: PartialDeep<Theme>
     multiple?: boolean
 }
 
+type KeypressEvent = {
+    name: string
+    ctrl: boolean
+    meta: boolean
+    shift: boolean
+    sequence: string
+}
+
 const MAX_VISIBLE = 6
+const S = {
+    dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
+    bold: (s: string) => `\x1b[1m${s}\x1b[0m`,
+    cyan: (s: string) => `\x1b[36m${s}\x1b[0m`,
+    red: (s: string) => `\x1b[31m${s}\x1b[0m`,
+    highlight: (s: string) => `\x1b[36m\x1b[1m${s}\x1b[0m`,
+}
+const BAR = S.dim('│')
 
-export const fuzzySearch = createPrompt(<T>(
-    config: FuzzySearchConfig<T>,
-    done: (value: T | T[]) => void
-) => {
-    const theme = makeTheme(config.theme)
-    const prefix = usePrefix({ status: 'idle', theme })
-    const [query, setQuery] = useState('')
-    const [cursor, setCursor] = useState(0)
-    const [selected, setSelected] = useState<T[]>([])
+class FuzzySearchPrompt<T> extends Prompt<T | T[]> {
+    private message: string
+    private items: Item<T>[]
+    private multiple: boolean
+    private query: string = ''
+    private cursor: number = 0
+    private selected: Set<T> = new Set()
+    private fuse: Fuse<Item<T>>
 
-    const fuse = useMemo(
-        () => new Fuse(config.items, { keys: ['label'], threshold: 0.4 }),
-        [config.items]
-    )
+    constructor(config: FuzzySearchConfig<T>) {
+        super({
+            // @clack/core uses `this.value` for tracking; we manage state manually
+            // so disable the built-in line tracking
+            render() {
+                return (this as unknown as FuzzySearchPrompt<T>)._buildFrame()
+            },
+        }, /* trackValue= */ false)
 
-    const filtered = useMemo(() => {
-        if (!query) return config.items
-        return fuse.search(query).map(r => r.item)
-    }, [query, fuse])
+        this.message = config.message
+        this.items = config.items
+        this.multiple = config.multiple ?? false
+        this.fuse = new Fuse(config.items, { keys: ['label'], threshold: 0.4 })
 
-    const visible = filtered.slice(0, MAX_VISIBLE)
-    const safeCursor = Math.min(cursor, Math.max(visible.length - 1, 0))
+        this.on('key', (key: string | undefined, info: Key) => this._handleKey(info))
+    }
 
-    useKeypress((key, rl) => {
+    private get filtered(): Item<T>[] {
+        if (!this.query) return this.items
+        return this.fuse.search(this.query).map(r => r.item)
+    }
 
-        if (key.name === 'space' && config.multiple) {
-            const item = visible[safeCursor];
-            if (!item) return;
-            const already = selected.includes(item.value);
-            setSelected(already
-                ? selected.filter(v => v !== item.value)
-                : [...selected, item.value]
-            )
-        }
+    private get visible(): Item<T>[] {
+        return this.filtered.slice(0, MAX_VISIBLE)
+    }
 
-        if (isEnterKey(key)) {
-            if (config.multiple) {
-                process.stdout.write('\x1B[?25h')
-                done(selected as any)
-            } else {
-                const item = visible[safeCursor]
-                if (item) {
-                    process.stdout.write('\x1B[?25h')
-                    done(item.value)
+    private get safeCursor(): number {
+        return Math.min(this.cursor, Math.max(this.visible.length - 1, 0))
+    }
+
+    private _handleKey(key: Key): void {
+        const visible = this.visible
+        const cursor = this.safeCursor
+
+        switch (key.name) {
+            case 'up':
+                this.cursor = Math.max(0, cursor - 1)
+                break
+
+            case 'down':
+                this.cursor = Math.min(visible.length - 1, cursor + 1)
+                break
+
+            case 'space':
+                if (this.multiple) {
+                    const item = visible[cursor]
+                    if (!item) break
+                    if (this.selected.has(item.value)) {
+                        this.selected.delete(item.value)
+                    } else {
+                        this.selected.add(item.value)
+                    }
+                }
+                break
+
+            case 'enter':
+                if (this.multiple) {
+                    this.value = [...this.selected] as any
+                } else {
+                    const item = visible[cursor]
+                    if (!item) return
+                    this.value = item.value as any
+                }
+                this.state = 'submit'
+                this.close()
+                break
+
+            case 'backspace':
+                this.query = this.query.slice(0, -1)
+                this.cursor = 0
+                break
+
+            default: {
+                const char = key.name?.length === 1 ? key.name : null
+                if (char) {
+                    this.query += char
+                    this.cursor = 0
                 }
             }
-            return
         }
+    }
 
-        if (isUpKey(key)) {
-            setCursor(Math.max(0, safeCursor - 1))
-            return
-        }
+    private _buildFrame(): string {
+        const visible = this.visible
+        const cursor = this.safeCursor
 
-        if (isDownKey(key)) {
-            setCursor(Math.min(visible.length - 1, safeCursor + 1))
-            return
-        }
+        const searchLine = `${BAR}\n${BAR}  ${S.bold(this.message)} ${S.cyan(this.query)}▌`
 
-        if (key.name === 'backspace') {
-            setQuery(query.slice(0, -1))
-            rl.clearLine(0)
-            return
-        }
+        const listLines = visible.length === 0
+            ? [`${BAR}  ${S.red('No results')}`]
+            : visible.map((item, i) => {
+                const isCursor = i === cursor
 
-        // use key.name as fallback for character
-        const char = key.name?.length === 1 ? key.name : null
-        if (char) {
-            setQuery(query + char)
-            rl.clearLine(0)
-            setCursor(0)
-        }
-    })
+                if (this.multiple) {
+                    const isChecked = this.selected.has(item.value)
+                    const box = isChecked ? S.cyan('◼') : S.dim('◻')
+                    const label = isCursor ? S.highlight(`❯ ${item.label}`) : S.dim(`  ${item.label}`)
+                    return `${BAR}  ${box} ${label}`
+                }
 
-    // move these inside useKeypress scope isn't possible, so handle cursor hide in render
-    process.stdout.write('\x1B[?25l')
-
-    const searchLine = `${prefix} ${theme.style.message(config.message, 'idle')} ${query}`
-
-    const separator = `\x1b[2m│\x1b[0m` // dim vertical bar, same as clack
-
-    const listLines = visible.length === 0
-        ? [`${separator}  ${theme.style.error('No results')}`]
-        : visible.map((item, i) => {
-            const isCursor = i === safeCursor
-
-            if (config.multiple) {
-                const isSelected = selected.includes(item.value)
-                const checkbox = isSelected ? '◼' : '◻'
                 if (isCursor) {
-                    return `${separator}  ${theme.style.highlight('❯ ' + checkbox + ' ' + item.label)}`
+                    return `${BAR}  ${S.highlight(`◈ ${item.label}`)}`
                 }
-                return `${separator}    ${checkbox} ${item.label}`
-            }
+                return `${BAR}  ${S.dim(`◇ ${item.label}`)}`
+            })
 
-            if (isCursor) {
-                return `${separator}  ${theme.style.highlight('  ◈ ' + item.label)}`
-            }
-            return `${separator}    ◇ ${item.label}`
-        })
+        return [searchLine, ...listLines, BAR].join('\n')
+    }
+}
 
-    return [searchLine, ...listLines].join('\n')
-})
+export async function fuzzySearch<T>(config: FuzzySearchConfig<T>): Promise<T | T[] | symbol> {
+    const prompt = new FuzzySearchPrompt<T>(config)
+    const result = await prompt.prompt()
+    if (result === undefined) throw new Error('fuzzySearch closed without a value')
+    console.log(result);
+    return result
+}

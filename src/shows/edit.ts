@@ -1,4 +1,4 @@
-import { cancel, isCancel, log } from "@clack/prompts";
+import { autocompleteMultiselect, cancel, isCancel, log } from "@clack/prompts";
 import { ExitPromptError } from "@inquirer/core";
 import { db } from "../db/client";
 import { fuzzySearch } from "../components/fuzzySearch";
@@ -18,10 +18,9 @@ export async function editShow() {
         const current = db.select().from(shows).where(eq(shows.id, showId)).get()
         if (!current) return
 
-        const selectedFields = await fuzzySearch({
+        const selectedFields = await autocompleteMultiselect({
             message: "What fields do you want to edit? (space to select)",
-            items: [...OPTIONS.fields],
-            multiple: true
+            options: [...OPTIONS.fields]
         }) as fieldsArray
 
         const updates: Partial<ShowRecord> = {};
@@ -44,7 +43,6 @@ export async function editShow() {
                 updates[field] = value as any
             }
         }
-        console.log(updates)
 
         await db.update(shows).set({ ...updates, updatedAt: new Date() }).where(eq(shows.id, showId));
 

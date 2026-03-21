@@ -2,7 +2,7 @@
 import Table from 'cli-table3'
 import { shows, timestamps } from './db/schema'
 import { OPTIONS, type fields, type showTypes, type TimestampField } from './constants'
-import { groupMultiselect, select, text, type Option } from '@clack/prompts'
+import { autocomplete, autocompleteMultiselect, groupMultiselect, select, text, type Option } from '@clack/prompts'
 import { db } from './db/client'
 import { fuzzySearch } from './components/fuzzySearch'
 
@@ -146,18 +146,17 @@ export async function fuzzyFindShow(multiple: boolean = false): Promise<number |
     }))
 
     if (multiple) {
-        const showIds = await fuzzySearch({
+        const showIds = await autocompleteMultiselect({
             message: "Which Shows you want to edit:",
-            items: items,
-            multiple: true
+            options: items,
         }) as number[]
 
         return showIds;
     }
 
-    const showId = await fuzzySearch({
+    const showId = await autocomplete({
         message: "Which Show you want to edit:",
-        items: items
+        options: items
     }) as number
 
     return showId;
