@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x64
+          - os: macos-latest
+            target: darwin-x64
+          - os: macos-latest
+            target: darwin-arm64
+          - os: windows-latest
+            target: windows-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build binary
+        run: bun build ./src/index.ts --compile --target=bun-${{ matrix.target }} --outfile=scenetrack
+
+      - name: Archive (unix)
+        if: matrix.os != 'windows-latest'
+        run: tar -czf scenetrack-${{ matrix.target }}.tar.gz scenetrack
+
+      - name: Archive (windows)
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path scenetrack.exe -DestinationPath scenetrack-${{ matrix.target }}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scenetrack-${{ matrix.target }}
+          path: scenetrack-${{ matrix.target }}.*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: dist/
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ github.ref_name }} dist/* \
+            --title "${{ github.ref_name }}" \
+            --generate-notes
+
+      - name: Get checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+          cat checksums.txt
+
+      - name: Upload checksums
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} dist/checksums.txt
