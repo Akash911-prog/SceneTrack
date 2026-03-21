@@ -4,22 +4,13 @@ import { db } from "../db/client";
 import { shows } from "../db/schema";
 import { cancel, confirm, isCancel, log } from "@clack/prompts";
 import { eq } from "drizzle-orm";
+import { fuzzyFindShow } from "../libs";
 
 export async function removeShow() {
 
     try {
 
-        const allShows = await db.select().from(shows);
-
-        const items = allShows.map(show => ({
-            label: `${show.title} — ${show.type} · ${show.status}`,
-            value: show.id
-        }))
-
-        const result = await fuzzySearch({
-            message: "Which Show you want to remove:",
-            items: items
-        }) as number
+        const result = await fuzzyFindShow()
 
         const confirmed = await confirm({
             message: `Are you sure you want to remove the show?`

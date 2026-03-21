@@ -4,24 +4,15 @@ import { db } from "../db/client";
 import { fuzzySearch } from "../components/fuzzySearch";
 import { shows } from "../db/schema";
 import { OPTIONS, type fields, type fieldsArray } from "../constants";
-import { promptForField, type ShowRecord } from "../libs";
+import { fuzzyFindShow, promptForField, type ShowRecord } from "../libs";
 import { eq } from "drizzle-orm";
 import { startCase, toLower } from "lodash-es";
 
 export async function editShow() {
     try {
 
-        const allShows = await db.select().from(shows);
-
-        const items = allShows.map(show => ({
-            label: `${show.title} — ${show.type} · ${show.status}`,
-            value: show.id
-        }))
-
-        const showId = await fuzzySearch({
-            message: "Which Show you want to edit:",
-            items: items
-        }) as number
+        // 1. find show
+        const showId = await fuzzyFindShow()
 
         // 2. get current data
         const current = db.select().from(shows).where(eq(shows.id, showId)).get()

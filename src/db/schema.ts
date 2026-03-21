@@ -21,6 +21,7 @@ export const timestamps = table('timestamps', {
     id: t.int().primaryKey({ autoIncrement: true }),
     showId: t.int().notNull().references(() => shows.id, { onDelete: 'cascade' }),
     episode: t.int(),
+    time: t.text(),
     note: t.text(),                // e.g. "finished season 2", "took a break"
     loggedAt: t.int({ mode: 'timestamp' }).$defaultFn(() => new Date()),
 })

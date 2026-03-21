@@ -3,7 +3,8 @@ const mainMenu = [
     { value: 'editShow', label: '2. Edit Show' },
     { value: 'removeShow', label: '3. Remove Show' },
     { value: 'viewAllShows', label: '4. View All Shows' },
-    { value: 'exit', label: '5. Exit' },
+    { value: 'timeStamp', label: '5. timeStamps' },
+    { value: 'exit', label: '6. Exit' },
 ] as const
 
 const showTypes = [
@@ -19,6 +20,15 @@ const statusOptions = [
     { value: 'watched', label: 'Watched' },
     { value: 'dropped', label: 'Dropped' },
     { value: 'paused', label: 'Paused' },
+] as const
+
+const timeStampMenu = [
+    { value: 'addTimestamp', label: '1. Add Timestamp' },
+    { value: 'editTimestamp', label: '2. Edit Timestamp' },
+    { value: 'removeTimestamp', label: '3. Remove Timestamp' },
+    { value: 'viewTimestamp', label: '4. View Timestamp from a Show' },
+    { value: 'viewAllTimestamps', label: '5. View All Timestamps' },
+    { value: 'back', label: '6. Go Back' }
 ] as const
 
 const fields = [
@@ -38,7 +48,8 @@ export const OPTIONS = {
     mainMenu,
     showTypes,
     statusOptions,
-    fields
+    fields,
+    timeStampMenu
 }
 
 export const PAGE_SIZE = 8
@@ -50,3 +61,4 @@ export type showTypes = typeof showTypes[number]['value']
 export type statusOptions = typeof statusOptions[number]['value']
 export type fields = typeof fields[number]['value']
 export type fieldsArray = Array<fields>
+export type timeStampMenu = typeof timeStampMenu[number]['value']
