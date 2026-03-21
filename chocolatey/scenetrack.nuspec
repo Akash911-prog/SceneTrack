@@ -5,12 +5,22 @@
   <authors>Akash911-prog</authors>
   <owners>Akash911-prog</owners>
   <projectUrl>https://github.com/Akash911-prog/scenetrack</projectUrl>
-  <packageSourceUrl>https://github.com/Akash911-prog/scenetrack/chocolatey</packageSourceUrl>
+  <packageSourceUrl>https://github.com/Akash911-prog/scenetrack/tree/main/chocolatey</packageSourceUrl>
   <summary>A CLI tool for managing your watchlist with timestamps and fuzzy search</summary>
-  <description>A menu-driven CLI tool for watchlist management...</description>
+  <description>
+    SceneTrack is a menu-driven CLI tool for managing your watchlist.
+    Track shows with status, rating, and episode progress. Log timestamps
+    with notes on specific shows. Search through your library with fuzzy
+    find or filter by status, type, and rating. Built with SQLite for
+    local storage.
+  </description>
   <releaseNotes>https://github.com/Akash911-prog/scenetrack/releases</releaseNotes>
   <tags>cli watchlist sqlite terminal</tags>
   <docsUrl>https://github.com/Akash911-prog/scenetrack#readme</docsUrl>
   <bugTrackerUrl>https://github.com/Akash911-prog/scenetrack/issues</bugTrackerUrl>
   <projectSourceUrl>https://github.com/Akash911-prog/scenetrack</projectSourceUrl>
 </metadata>
+<files>
+  <file src="chocolatey\tools\**" target="tools" />
+  <file src="chocolatey\*.nuspec" target="" />
+</files>
