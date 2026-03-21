@@ -30,7 +30,7 @@ jobs:
         run: bun install
 
       - name: Build binary
-        run: bun build ./src/index.ts --compile --target=bun-${{ matrix.target }} --outfile=scenetrack
+        run: bun build ./src/index.ts --compile --target=bun-${{ matrix.target }} --outfile=./dist/scenetrack
 
       - name: Archive (unix)
         if: matrix.os != 'windows-latest'
@@ -77,3 +77,67 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.ref_name }} dist/checksums.txt
+
+  homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Akash911-prog/homebrew-scenetrack
+          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+          path: tap
+
+      - name: Get checksums
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+            gh release download ${{ github.ref_name }} \
+                --repo Akash911-prog/scenetrack \
+                --pattern checksums.txt
+            echo "SHA_INTEL=$(grep darwin-x64 checksums.txt | awk '{print $1}')" >> $GITHUB_ENV
+            echo "SHA_ARM=$(grep darwin-arm64 checksums.txt | awk '{print $1}')" >> $GITHUB_ENV
+
+      - name: Update formula
+        run: |
+          VERSION=${{ github.ref_name }}
+          cat > tap/Formula/scenetrack.rb << EOF
+          class Scenetrack < Formula
+            desc "Your CLI tool description"
+            homepage "https://github.com/Akash911-prog/scenetrack"
+            version "${VERSION#v}"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "https://github.com/Akash911-prog/scenetrack/releases/download/${VERSION}/scenetrack-darwin-arm64.tar.gz"
+                sha256 "$SHA_ARM"
+              else
+                url "https://github.com/Akash911-prog/scenetrack/releases/download/${VERSION}/scenetrack-darwin-x64.tar.gz"
+                sha256 "$SHA_INTEL"
+              end
+            end
+
+            on_linux do
+              url "https://github.com/Akash911-prog/scenetrack/releases/download/${VERSION}/scenetrack-linux-x64.tar.gz"
+              sha256 "$(grep linux-x64 checksums.txt | awk '{print $1}')"
+            end
+
+            def install
+              bin.install "scenetrack"
+            end
+
+            test do
+              system "#{bin}/scenetrack", "--version"
+            end
+          end
+          EOF
+
+      - name: Push formula
+        run: |
+          cd tap
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add Formula/scenetrack.rb
+          git commit -m "Update scenetrack to ${{ github.ref_name }}"
+          git push
