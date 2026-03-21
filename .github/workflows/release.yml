@@ -29,16 +29,21 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build binary
+      - name: Build binary (unix)
+        if: matrix.os != 'windows-latest'
         run: bun build ./src/index.ts --compile --target=bun-${{ matrix.target }} --outfile=./dist/scenetrack
+
+      - name: Build binary (windows)
+        if: matrix.os == 'windows-latest'
+        run: bun build ./src/index.ts --compile --target=bun-${{ matrix.target }} --outfile=./dist/scenetrack.exe
 
       - name: Archive (unix)
         if: matrix.os != 'windows-latest'
-        run: tar -czf scenetrack-${{ matrix.target }}.tar.gz scenetrack
+        run: tar -czf scenetrack-${{ matrix.target }}.tar.gz -C dist scenetrack
 
       - name: Archive (windows)
         if: matrix.os == 'windows-latest'
-        run: Compress-Archive -Path scenetrack.exe -DestinationPath scenetrack-${{ matrix.target }}.zip
+        run: Compress-Archive -Path dist/scenetrack.exe -DestinationPath scenetrack-${{ matrix.target }}.zip
 
       - uses: actions/upload-artifact@v4
         with:
