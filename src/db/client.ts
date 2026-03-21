@@ -3,8 +3,9 @@ import { drizzle } from "drizzle-orm/bun-sqlite";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import path from 'path';
 import * as schema from './schema'
+import { homedir } from "os";
 
-const sqlite = new Database(path.join(process.cwd(), 'dbfiles/scenetrack.db'));
+const sqlite = new Database(path.join(homedir(), '.scenetrack/dbfiles/scenetrack.db'));
 export const db = drizzle(sqlite, { schema });
 
 console.log(process.cwd())
