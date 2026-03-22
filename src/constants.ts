@@ -5,6 +5,7 @@ const mainMenu = [
     { value: 'viewAllShows', label: '4. View All Shows' },
     { value: 'timeStamp', label: '5. timeStamps' },
     { value: 'search', label: '6. Search Show in Watchlist' },
+    { value: 'importExport', label: '7. Import / Export ( JSON )' },
     { value: 'exit', label: '7. Exit' },
 ] as const
 

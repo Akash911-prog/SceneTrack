@@ -30,9 +30,9 @@ brew install scenetrack
 choco install scenetrack
 ```
 
-### Windows (manual)
+### Manual (recomended for windows)
 
-Download the latest `.zip` from the [releases page](https://github.com/Akash911-prog/scenetrack/releases), extract it, and add the binary to your PATH.
+Download the latest `.zip`/ `.tar.gz` from the [releases page](https://github.com/Akash911-prog/scenetrack/releases), extract it, and add the binary to your PATH.
 
 ---
 
