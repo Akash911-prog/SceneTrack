@@ -1,4 +1,4 @@
 VERIFICATION
 Package can be verified by:
 1. Download the binary from https://github.com/Akash911-prog/scenetrack/releases
-2. Verify SHA256 hash matches: a68ee3e26da022091d6ad3cff9f2ce3c58c22009fb9138a17d4f7a94f4d09ade
+2. Verify SHA256 hash matches: 5b4fb06fd24e9b0946af9a3fcf5eef742888c07a3300d742beaa1def8965a89e
