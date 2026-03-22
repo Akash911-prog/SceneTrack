@@ -238,3 +238,10 @@ export async function getFilters() {
 
     return filters;
 }
+
+export function getEnumKeyByValue<T extends Record<string, string>>(
+    enumObj: T,
+    value: string
+): keyof T {
+    return Object.keys(enumObj).find(key => enumObj[key] === value) as keyof T
+}

@@ -1,3 +1,7 @@
+import { mkdirSync } from "fs"
+import { homedir } from "os"
+import path from "path"
+
 const mainMenu = [
     { value: 'addShow', label: '1. Add Show' },
     { value: 'editShow', label: '2. Edit Show' },
@@ -6,7 +10,7 @@ const mainMenu = [
     { value: 'timeStamp', label: '5. timeStamps' },
     { value: 'search', label: '6. Search Show in Watchlist' },
     { value: 'importExport', label: '7. Import / Export ( JSON )' },
-    { value: 'exit', label: '7. Exit' },
+    { value: 'exit', label: '8. Exit' },
 ] as const
 
 const showTypes = [
@@ -80,6 +84,34 @@ const filterOptions = {
     ],
 }
 
+export enum ShowType {
+    Series = 'series',
+    Movie = 'movie',
+    Anime = 'anime',
+    Documentary = 'documentary',
+}
+
+export enum ShowStatus {
+    Planning = 'planning',
+    Watching = 'watching',
+    Watched = 'watched',
+    Dropped = 'dropped',
+    Paused = 'paused',
+}
+
+export type importExport = {
+    title: string,
+    type: ShowType,
+    status: ShowStatus,
+    rating?: number,
+    notes?: string,
+    genre?: string,
+    totalEpisode?: number,
+    watchedEpisode?: number,
+    startedAt?: Date,
+    finishedAt?: Date
+}
+
 export const OPTIONS = {
     mainMenu,
     showTypes,
@@ -93,6 +125,8 @@ export const OPTIONS = {
 export const PAGE_SIZE = 8
 export const RESET = '\x1b[0m'
 export const DIM = '\x1b[2m'
+export const defaultExportPath = path.join(homedir(), '.scenetrack/exports')
+export const defaultImportPath = path.join(homedir(), '.scenetrack/imports')
 
 export type MainMenuChoice = typeof mainMenu[number]['value']
 export type showTypes = typeof showTypes[number]['value']

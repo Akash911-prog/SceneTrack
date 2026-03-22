@@ -1,3 +1,4 @@
+import { importExport } from "./importExport/entry"
 import { addShow } from "./shows/add"
 import { editShow } from "./shows/edit"
 import { removeShow } from "./shows/remove"
@@ -15,7 +16,8 @@ const mainMenu: Record<string, () => Promise<void>> = {
     removeShow,
     viewAllShows,
     timeStamp: showTimeStampMenu,
-    search
+    search,
+    importExport
 }
 
 const timeStampMenu: Record<string, () => Promise<void>> = {
