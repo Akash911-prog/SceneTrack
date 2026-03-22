@@ -34,6 +34,7 @@ Track shows, log timestamps with notes, and search your library with fuzzy find 
 - **Filters** — filter your watchlist by status, type, and rating using a grouped multiselect menu
 - **Pretty menus** — all interactions are driven by `@clack/prompts` for a clean terminal UI
 - **Local SQLite database** — your data stays on your machine, powered by Drizzle ORM
+- **Import and Export with JSON** — you can export and import all watchlist and timestamps with a json file
 
 ---
 
@@ -50,6 +51,12 @@ brew install scenetrack
 
 ```bash
 choco install scenetrack
+```
+
+### Windows - Scoop
+```bash
+scoop bucket add scenetrack https://github.com/Akash911-prog/scoop-scenetrack
+scoop install scenetrack
 ```
 
 ### Manual (recommended for Windows)
